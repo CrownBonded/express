@@ -1,0 +1,244 @@
+$ npm install --save multer
+var express = require('express')
+var multer  = require('multer')
+var upload = multer({ dest: 'uploads/' })
+ 
+var app = express()
+ 
+app.post('/profile', upload.single('avatar'), function (req, res, next) {
+  // req.file is the `avatar` file 
+  // req.body will hold the text fields, if there were any 
+})
+ 
+app.post('/photos/upload', upload.array('photos', 12), function (req, res, next) {
+  // req.files is array of `photos` files 
+  // req.body will contain the text fields, if there were any 
+})
+ 
+var cpUpload = upload.fields([{ name: 'avatar', maxCount: 1 }, { name: 'gallery', maxCount: 8 }])
+app.post('/cool-profile', cpUpload, function (req, res, next) {
+  // req.files is an object (String -> Array) where fieldname is the key, and the value is array of files 
+  // 
+  // e.g. 
+  //  req.files['avatar'][0] -> File 
+  //  req.files['gallery'] -> Array 
+  // 
+  // req.body will contain the text fields, if there were any 
+})
+var express = require('express')
+var app = express()
+var multer  = require('multer')
+var upload = multer()
+ 
+app.post('/profile', upload.array(), function (req, res, next) {
+  // req.body contains the text fields 
+})
+var upload = multer({ dest: 'uploads/' })
+[
+  { name: 'avatar', maxCount: 1 },
+  { name: 'gallery', maxCount: 8 }
+]
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, '/tmp/my-uploads')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now())
+  }
+})
+ 
+var upload = multer({ storage: storage })
+var storage = multer.memoryStorage()
+var upload = multer({ storage: storage })
+function fileFilter (req, file, cb) {
+ 
+  // The function should call `cb` with a boolean 
+  // to indicate if the file should be accepted 
+ 
+  // To reject this file pass `false`, like so: 
+  cb(null, false)
+ 
+  // To accept the file pass `true`, like so: 
+  cb(null, true)
+ 
+  // You can always pass an error if something goes wrong: 
+  cb(new Error('I don\'t have a clue!'))
+ 
+}
+var upload = multer().single('avatar')
+ 
+app.post('/profile', function (req, res) {
+  upload(req, res, function (err) {
+    if (err) {
+      // An error occurred when uploading 
+      return
+    }
+ 
+    // Everything went fine 
+  })
+})
+var http = require('http'), inspect = require('util').inspect; var Busboy = require('busboy'); http.createServer(function(req, res) { if (req.method === 'POST') { var busboy = new Busboy({ headers: req.headers }); busboy.on('file', function(fieldname, file, filename, encoding, mimetype) { console.log('File [' + fieldname + ']: filename: ' + filename); file.on('data', function(data) { console.log('File [' + fieldname + '] got ' + data.length + ' bytes'); }); file.on('end', function() { console.log('File [' + fieldname + '] Finished'); }); }); busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated) { console.log('Field [' + fieldname + ']: value: ' + inspect(val)); }); busboy.on('finish', function() { console.log('Done parsing form!'); res.writeHead(303, { Connection: 'close', Location: '/' }); res.end(); }); req.pipe(busboy); } else if (req.method === 'GET') { res.writeHead(200, { Connection: 'close' }); res.end('<html><head></head><body>\                <form method="POST">\                 <input type="text" name="textfield"><br />\                 <select name="selectfield">\                   <option value="1">1</option>\                   <option value="10">10</option>\                   <option value="100">100</option>\                   <option value="9001">9001</option>\                 </select><br />\                 <input type="checkbox" name="checkfield">Node.js rules!<br />\                 <input type="submit">\               </form>\             </body></html>'); } }).listen(3000, function() { console.log('Listening for requests'); }); // Example output: // // Listening for requests // Field [textfield]: value: 'testing! :-)' // Field [selectfield]: value: '9001' // Field [checkfield]: value: 'on' // Done parsing form!
+// only requests to /calendar/* will be sent to our "router"
+app.use('/calendar', router);
+router.all('*', requireAuthentication, loadUser); 
+router.all('*', requireAuthentication) router.all('*', loadUser); 
+router.all('/api/*', requireAuthentication); 
+router.get('/', function(req, res){ res.send('hello world'); }); 
+router.get(/^\/commits\/(\w+)(?:\.\.(\w+))?$/, function(req, res){ var from = req.params[0]; var to = req.params[1] || 'HEAD'; res.send('commit range ' + from + '..' + to); }); 
+router.param('user', function(req, res, next, id) { // try to get the user details from the User model and attach it to the request object
+User.find(id, function(err, user) { if (err) { next(err); } else if (user) { req.user = user; next(); } else { next(new Error('failed to load user')); } }); }); 
+router.param('id', function (req, res, next, id) { console.log('CALLED ONLY ONCE'); next(); }); router.get('/user/:id', function (req, res, next) { console.log('although this matches'); next(); }); router.get('/user/:id', function (req, res) { console.log('and this matches too'); res.end(); }); 
+var express = require('express'); var app = express(); var router = express.Router(); // customizing the behavior of router.param()
+router.param(function(param, option) { return function (req, res, next, val) { if (val == option) { next(); } else { res.sendStatus(403); } } }); // using the customized router.param()
+router.param('id', 1337); // route to trigger the capture
+router.get('/user/:id', function (req, res) { res.send('OK'); }); app.use(router); app.listen(3000, function () { console.log('Ready'); });
+router.param(function(param, validator) { return function (req, res, next, val) { if (validator(val)) { next(); } else { res.sendStatus(403); } } }); router.param('id', function (candidate) { return !isNaN(parseFloat(candidate)) && isFinite(candidate); }); 
+var router = express.Router(); router.param('user_id', function(req, res, next, id) { // sample user, would actually fetch from DB, etc...
+req.user = { id: id, name: 'TJ' }; next(); }); router.route('/users/:user_id') .all(function(req, res, next) { // runs for all HTTP verbs first
+// think of it as route specific middleware!
+next(); }) .get(function(req, res, next) { res.json(req.user); }) .put(function(req, res, next) { // just an example of maybe updating the user
+req.user.name = req.params.name; // save user ... etc
+res.json(req.user); }) .post(function(req, res, next) { next(new Error('not implemented')); }) .delete(function(req, res, next) { next(new Error('not implemented')); });
+var express = require('express'); var app = express(); var router = express.Router(); // simple logger for this router's requests
+// all requests to this router will first hit this middleware
+router.use(function(req, res, next) { console.log('%s %s %s', req.method, req.url, req.path); next(); }); // this will only be invoked if the path starts with /bar from the mount point
+router.use('/bar', function(req, res, next) { // ... maybe some additional /bar logging ...
+next(); }); // always invoked
+router.use(function(req, res, next) { res.send('Hello World'); }); app.use('/foo', router); app.listen(3000);
+var logger = require('morgan'); router.use(logger()); router.use(express.static(__dirname + '/public')); router.use(function(req, res){ res.send('Hello'); });
+router.use(express.static(__dirname + '/public')); router.use(logger()); router.use(function(req, res){ res.send('Hello'); }); 
+app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/files'));
+app.use(express.static(__dirname + '/uploads'));
+var authRouter = express.Router(); var openRouter = express.Router(); authRouter.use(require('./authenticate').basic(usersdb)); authRouter.get('/:user_id/edit', function(req, res, next) { // ... Edit user UI ...  
+}); openRouter.get('/', function(req, res, next) { // ... List users ... 
+}) openRouter.get('/:user_id', function(req, res, next) { // ... View user ... 
+}) app.use('/users', authRouter); app.use('/users', openRouter);
+app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal'])
+app.set('trust proxy', function (ip) { if (ip === '127.0.0.1' || ip === '123.123.123.123') return true; // trusted IPs
+else return false; });
+app.set('etag', function (body, encoding) { return generateHash(body, encoding); // consider the function is defined
+}); 
+app.use(function (req, res, next) { console.log('Time: %d', Date.now()); next(); });
+// this middleware will not allow the request to go beyond it
+app.use(function(req, res, next) { res.send('Hello World'); }); // requests will never reach this route
+app.get('/', function (req, res) { res.send('Welcome'); });
+app.use(function(err, req, res, next) { console.error(err.stack); res.status(500).send('Something broke!'); });
+app.use('/abcd', function (req, res, next) { next(); });
+app.use('/abc?d', function (req, res, next) { next(); }); 
+app.use('/ab+cd', function (req, res, next) { next(); });
+app.use('/ab\*cd', function (req, res, next) { next(); });
+app.use('/a(bc)?d', function (req, res, next) { next(); });
+app.use(/\/abc|\/xyz/, function (req, res, next) { next(); });
+app.use(['/abcd', '/xyza', /\/lmn|\/pqr/], function (req, res, next) { next(); });
+app.use(function (req, res, next) { next(); });
+var router = express.Router(); router.get('/', function (req, res, next) { next(); }); app.use(router);
+var subApp = express(); subApp.get('/', function (req, res, next) { next(); }); app.use(subApp);
+var r1 = express.Router(); r1.get('/', function (req, res, next) { next(); }); var r2 = express.Router(); r2.get('/', function (req, res, next) { next(); }); app.use(r1, r2); 
+var r1 = express.Router(); r1.get('/', function (req, res, next) { next(); }); var r2 = express.Router(); r2.get('/', function (req, res, next) { next(); }); app.use('/', [r1, r2]);
+function mw1(req, res, next) { next(); } function mw2(req, res, next) { next(); } var r1 = express.Router(); r1.get('/', function (req, res, next) { next(); }); var r2 = express.Router(); r2.get('/', function (req, res, next) { next(); }); var subApp = express(); subApp.get('/', function (req, res, next) { next(); }); app.use(mw1, [mw2, r1, r2], subApp);
+// GET /style.css etc
+app.use(express.static(__dirname + '/public')); 
+// GET /static/style.css etc.
+app.use('/static', express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public')); app.use(logger()); 
+app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/files'));
+app.use(express.static(__dirname + '/uploads'));
+app.get('/user/:id', function(req, res) { res.send('user ' + req.params.id); }); 
+app.get('/user/:id', function(request, response) { response.send('user ' + request.params.id); }); 
+//index.js
+app.get('/viewdirectory', require('./mymiddleware.js')) 
+//mymiddleware.js
+module.exports = function (req, res) { res.send('The views directory is ' + req.app.get('views')); }); 
+app.use(['/gre+t', '/hel{2}o'], greet); // load the router on '/gre+t' and '/hel{2}o'
+app.use(['/gre+t', '/hel{2}o'], greet); // load the router on '/gre+t' and '/hel{2}o'
+var app = require('express')(); var bodyParser = require('body-parser'); var multer = require('multer'); // v1.0.5
+var upload = multer(); // for parsing multipart/form-data
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+app.post('/profile', upload.array(), function (req, res, next) { console.log(req.body); res.json(req.body); }); 
+// Cookie: name=tj
+req.cookies.name // => "tj"
+req.fresh // => true
+// Host: "example.com:3000"
+req.hostname // => "example.com"
+req.ip // => "127.0.0.1"
+// GET /search?q=something
+req.originalUrl // => "/search?q=something"
+app.use('/admin', function(req, res, next) { // GET 'http://www.example.com/admin/new'
+console.log(req.originalUrl); // '/admin/new'
+console.log(req.baseUrl); // '/admin'
+console.log(req.path); // '/new'
+next(); });
+// GET /user/tj
+req.params.name // => "tj"
+// GET /file/javascripts/jquery.js
+req.params[0] // => "javascripts/jquery.js"
+app.enabled('trust proxy'); // => true
+app.enable('trust proxy'); app.enabled('trust proxy'); // => true
+app.engine('pug', require('pug').__express);
+app.engine('html', require('ejs').renderFile);
+var engines = require('consolidate'); app.engine('haml', engines.haml); app.engine('html', engines.hogan);
+app.get('title'); // => undefined
+app.set('title', 'My Site'); app.get('title'); // => "My Site"
+app.get('/', function (req, res) { res.send('GET request to homepage'); }); 
+var express = require('express'); var app = express(); app.listen('/tmp/sock'); 
+var express = require('express'); var app = express(); app.listen(3000);
+var express = require('express'); var https = require('https'); var http = require('http'); var app = express(); http.createServer(app).listen(80); https.createServer(options, app).listen(443);
+app.listen = function() { var server = http.createServer(this); return server.listen.apply(server, arguments); };
+app.param('user', function(req, res, next, id) { // try to get the user details from the User model and attach it to the request object
+User.find(id, function(err, user) { if (err) { next(err); } else if (user) { req.user = user; next(); } else { next(new Error('failed to load user')); } }); }); 
+app.param('id', function (req, res, next, id) { console.log('CALLED ONLY ONCE'); next(); }); app.get('/user/:id', function (req, res, next) { console.log('although this matches'); next(); }); app.get('/user/:id', function (req, res) { console.log('and this matches too'); res.end(); }); 
+app.param('id', function (req, res, next, id) { console.log('CALLED ONLY ONCE'); next(); }); app.get('/user/:id', function (req, res, next) { console.log('although this matches'); next(); }); app.get('/user/:id', function (req, res) { console.log('and this matches too'); res.end(); }); 
+app.param(['id', 'page'], function (req, res, next, value) { console.log('CALLED ONLY ONCE with', value); next(); }); app.get('/user/:id/:page', function (req, res, next) { console.log('although this matches'); next(); }); app.get('/user/:id/:page', function (req, res) { console.log('and this matches too'); res.end(); }); 
+var express = require('express'); var app = express(); // customizing the behavior of app.param()
+app.param(function(param, option) { return function (req, res, next, val) { if (val == option) { next(); } else { next('route'); } } }); // using the customized app.param()
+app.param('id', 1337); // route to trigger the capture
+app.get('/user/:id', function (req, res) { res.send('OK'); }); app.listen(3000, function () { console.log('Ready'); }); 
+app.param(function(param, validator) { return function (req, res, next, val) { if (validator(val)) { next(); } else { next('route'); } } }); app.param('id', function (candidate) { return !isNaN(parseFloat(candidate)) && isFinite(candidate); }); 
+//captures '1-a_6' but not '543-azser-sder'
+router.get('/[0-9]+-[[\\w]]*', function); //captures '1-a_6' and '543-az(ser"-sder' but not '5-a s'
+router.get('/[0-9]+-[[\\S]]*', function); //captures all (equivalent to '.*')
+router.get('[[\\s\\S]]*', function);
+var app = express() , blog = express() , blogAdmin = express(); app.use('/blog', blog); blog.use('/admin', blogAdmin); console.log(app.path()); // ''
+console.log(blog.path()); // '/blog'
+console.log(blogAdmin.path()); // '/blog/admin'
+app.post('/', function (req, res) { res.send('POST request to homepage'); });
+app.put('/', function (req, res) { res.send('PUT request to homepage'); }); 
+app.render('email', function(err, html){ // ...
+}); app.render('email', { name: 'Tobi' }, function(err, html){ // ...
+});
+var app = express(); app.route('/events') .all(function(req, res, next) { // runs for all HTTP verbs first
+// think of it as route specific middleware!
+}) .get(function(req, res, next) { res.json(...); }) .post(function(req, res, next) { // maybe add a new event...
+});
+app.set('title', 'My Site'); app.get('title'); // "My Site"
+app.set('trust proxy', 'loopback') 
+app.set('trust proxy', 'loopback, 123.123.123.123') 
+app.set('trust proxy', 'loopback, linklocal, uniquelocal')
+var express = require('express'); var app = express(); 
+fn(res, path, stat) 
+var router = express.Router([options]); 
+var express = require('express'); var app = express(); app.get('/', function(req, res){ res.send('hello world'); }); app.listen(3000);
+app.locals.title = 'GLITCH3000'; app.locals.strftime = require('strftime'); app.locals.email = 'contact@zapier.com'; 
+var express = require('express'); var app = express();GLITCH3000
+var admin = express(); //node.js
+admin.get('/', function (req, res) { console.log(admin.mountpath); // /admin
+res.send('Admin Homepage'); }); app.use('/admin', admin); // mount the sub app
+var admin = express(); admin.get('/', function (req, res) { console.log(admin.mountpath); // [ '/adm*n', '/manager' ]
+res.send('Admin Homepage'); }); var secret = express(); secret.get('/', function (req, res) { console.log(secret.mountpath); // /secr*t
+res.send('Admin Secret'); }); admin.use('/secr*t', secret); // load the 'secret' router on '/secr*t', on the 'admin' sub app
+app.use(['/adm*n', '/manager'], admin); // load the 'admin' router on '/adm*n' and '/manager', on the parent app
+var admin = express(); admin.on('mount', function (parent) { console.log('Admin Mounted'); console.log(parent); // refers to the parent app
+}); admin.get('/', function (req, res) { res.send('Admin Homepage'); }); app.use('/admin', admin); 
+app.all('/secret', function (req, res, next) { console.log('Accessing the secret section ...') next() // pass control to the next handler
+});
+app.all('*', requireAuthentication, loadUser); 
+app.all('*', requireAuthentication); app.all('*', loadUser); 
+app.all('/api/*', requireAuthentication); 
+app.delete('/', function (req, res) { res.send('DELETE request to homepage'); }); 
+app.disable('trust proxy'); app.get('trust proxy'); // => false
+app.disabled('trust proxy'); // => true
+app.enable('trust proxy'); app.disabled('trust proxy'); // => true
+app.enable('trust proxy'); app.get('trust proxy'); // => true
