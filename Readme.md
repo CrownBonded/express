@@ -21,6 +21,8 @@ app.listen(3000)
 
 ## Installation
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/CrownBonded/express.svg)](https://greenkeeper.io/)
+
 ```bash
 $ npm install express
 ```
